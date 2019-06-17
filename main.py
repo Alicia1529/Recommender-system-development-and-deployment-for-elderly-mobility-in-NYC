@@ -21,6 +21,7 @@ import requests
 import sys
 import urllib
 import time
+import random
 
 #import api key
 import config
@@ -55,8 +56,9 @@ BUSINESS_PATH = '/v3/businesses/'  # Business ID will come after slash.
 DEFAULT_TIME = time.strftime('%H:%M')  #get current time 
 DEFAULT_LONGITUDE = -73.99429321289062
 DEFAULT_LATITUDE = 40.70544486444615 
-DEFAULT_RADIUS = 1000 #meters
-SEARCH_LIMIT = 1
+DEFAULT_RADIUS = 500 #meters
+DEFAULT_OFFSET = 0 #meters
+SEARCH_LIMIT = 50
 
 
 def request(host, path, api_key, url_params=None):
@@ -84,7 +86,7 @@ def request(host, path, api_key, url_params=None):
     return response.json()
 
 
-def search(api_key, current_time, longitude,latitude, radius):
+def search(api_key, current_time, longitude,latitude, radius, offset):
     """Query the Search API by a search term and location.
     Args:
         term (str): The search term passed to the API.
@@ -108,8 +110,9 @@ def search(api_key, current_time, longitude,latitude, radius):
         'term': term.replace(' ', '+'),
         'longitude': longitude,
         'latitude': latitude,
-        "radius": radius ,
-        'limit': SEARCH_LIMIT
+        "radius": radius,
+        'limit': SEARCH_LIMIT,
+        "offset":offset
     }
     return request(API_HOST, SEARCH_PATH, api_key, url_params=url_params)
 
@@ -134,18 +137,38 @@ def query_api(current_time, longitude, latitude, radius):
         longitude (decimal): decimal	Required if location is not provided. Longitude of the location you want to search nearby.
         latitude (decimal): decimal	Required if location is not provided. Latitude of the location you want to search nearby.
     """
-    start = time.time()
-    print("-----start-----\n")
+    resturants = []
 
-    response = search(API_KEY, current_time, longitude, latitude, radius)
+    response = search(API_KEY, current_time, longitude, latitude, radius, DEFAULT_OFFSET)
 
-    print(response)
+    total = response.get("total")
 
-    end = time.time()
-    print("-----end-----\n")
-    print(end-start)
+    if total!=0:
 
-    # businesses = response.get('businesses')
+        businesses = response.get('businesses')
+        resturants.extend(businesses)
+
+        num_page = (total-1)//SEARCH_LIMIT  # if 50, then just 1 page and the offset is 0
+
+        for num in range(1,num_page):
+            response = search(API_KEY, current_time, longitude, latitude, radius, num)
+            businesses = response.get('businesses')
+            resturants.extend(businesses)
+
+    print("total",total)
+    
+    for each in resturants:
+        print(each["distance"],"\n")
+
+    output = []
+    while len(output)<3:
+        idx = random.randint(0,len(resturants)-1)
+        if (idx not in output) and (resturants[idx]['is_closed'] is False):
+            output.append(idx)
+            print(idx)
+            print(resturants[idx],"\n")
+
+    # print(businesses)
 
     # if not businesses:
     #     print(u'No businesses for {0} in [{1},{2}] found.'.format(term,longitude, latitude))
