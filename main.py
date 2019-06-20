@@ -52,14 +52,17 @@ SEARCH_PATH = '/v3/businesses/search'
 BUSINESS_PATH = '/v3/businesses/'  # Business ID will come after slash.
 
 
-# Defaults 
-DEFAULT_TIME = time.strftime('%H:%M')  #get current time 
+# Defaults
+DEFAULT_TIME = time.strftime('%H:%M')  #get current time
 DEFAULT_LONGITUDE = -73.99429321289062
-DEFAULT_LATITUDE = 40.70544486444615 
+DEFAULT_LATITUDE = 40.70544486444615
 DEFAULT_RADIUS = 500 #meters
+DEFAULT_PRICE = 2 #means "$$". the program reads $$ as 3754, so need to use int to represent it
 DEFAULT_OFFSET = 0 #meters
 SEARCH_LIMIT = 50
 
+#Price
+PRICE2NUM = {"$":1,"$$":2,"$$$":3,"$$$$":4}
 
 def request(host, path, api_key, url_params=None):
     """Given your API_KEY, send a GET request to the API.
@@ -129,7 +132,7 @@ def get_business(api_key, business_id):
     return request(API_HOST, business_path, api_key)
 
 
-def query_api(current_time, longitude, latitude, radius):
+def query_api(current_time, longitude, latitude, radius, price):
     """Queries the API by the input values from the user.
     Args:
         term (str): The search term to query.
@@ -137,7 +140,7 @@ def query_api(current_time, longitude, latitude, radius):
         longitude (decimal): decimal	Required if location is not provided. Longitude of the location you want to search nearby.
         latitude (decimal): decimal	Required if location is not provided. Latitude of the location you want to search nearby.
     """
-    resturants = []
+    restaurants = []
 
     response = search(API_KEY, current_time, longitude, latitude, radius, DEFAULT_OFFSET)
 
@@ -146,28 +149,32 @@ def query_api(current_time, longitude, latitude, radius):
     if total!=0:
 
         businesses = response.get('businesses')
-        resturants.extend(businesses)
+        restaurants.extend(businesses)
 
         num_page = (total-1)//SEARCH_LIMIT  # if 50, then just 1 page and the offset is 0
 
         for num in range(1,num_page):
             response = search(API_KEY, current_time, longitude, latitude, radius, num)
             businesses = response.get('businesses')
-            resturants.extend(businesses)
+            restaurants.extend(businesses)
 
     print("total",total)
-    
-    for each in resturants:
+    restaurants = list(filter(lambda x:x["is_closed"] is False and PRICE2NUM[x["price"]]<=price,restaurants))
+    print("num of qualified restaurants",len(restaurants))
+
+    for each in restaurants:
         print(each["distance"],"\n")
 
     output = []
-    while len(output)<3:
-        idx = random.randint(0,len(resturants)-1)
-        if (idx not in output) and (resturants[idx]['is_closed'] is False):
-            output.append(idx)
-            print(idx)
-            print(resturants[idx],"\n")
+    iteration = 0
+    while iteration<3 and restaurants: #either find 3 restaurants or not qualified restaurants
+        idx = random.randint(0,len(restaurants)-1)
+        print(idx)
+        print(restaurants[idx],"\n")
+        restaurants.pop(idx)
+        iteration+=1
 
+            
     # print(businesses)
 
     # if not businesses:
@@ -199,11 +206,13 @@ def main():
     parser.add_argument('-r', '--radius', dest='radius',
                         default=DEFAULT_RADIUS, type=float,
                         help='Search radius (default: %(default)s)')
-
+    parser.add_argument('-p', '--price', dest='price',
+                        default=DEFAULT_PRICE, type=int,
+                        help='Search price (default: %(default)s)')
     input_values = parser.parse_args()
 
     try:
-        query_api(input_values.current_time, input_values.longitude, input_values.latitude, input_values.radius )
+        query_api(input_values.current_time, input_values.longitude, input_values.latitude, input_values.radius, input_values.price )
     except HTTPError as error:
         sys.exit(
             'Encountered HTTP error {0} on {1}:\n {2}\nAbort program.'.format(
