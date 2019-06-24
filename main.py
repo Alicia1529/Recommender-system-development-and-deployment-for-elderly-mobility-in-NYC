@@ -62,7 +62,7 @@ DEFAULT_OFFSET = 0 #meters
 SEARCH_LIMIT = 50
 
 #Price
-PRICE2NUM = {"$":1,"$$":2,"$$$":3,"$$$$":4}
+PRICE2NUM = {"$":1,"$$":2,"$$$":3,"$$$$":4,"None":5}
 
 def request(host, path, api_key, url_params=None):
     """Given your API_KEY, send a GET request to the API.
@@ -159,7 +159,8 @@ def query_api(current_time, longitude, latitude, radius, price):
             restaurants.extend(businesses)
 
     print("total",total)
-    restaurants = list(filter(lambda x:x["is_closed"] is False and PRICE2NUM[x["price"]]<=price,restaurants))
+
+    restaurants = list(filter(lambda x:x["is_closed"] is False and PRICE2NUM[x.get("price","None")]<=price,restaurants))
     print("num of qualified restaurants",len(restaurants))
 
     for each in restaurants:
@@ -167,7 +168,7 @@ def query_api(current_time, longitude, latitude, radius, price):
 
     output = []
     iteration = 0
-    while iteration<3 and restaurants: #either find 3 restaurants or not qualified restaurants
+    while iteration<3 and restaurants: #either find 3 restaurants or not enough qualified restaurants
         idx = random.randint(0,len(restaurants)-1)
         print(idx)
         print(restaurants[idx],"\n")
