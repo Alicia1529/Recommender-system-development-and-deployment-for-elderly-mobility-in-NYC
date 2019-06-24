@@ -54,15 +54,16 @@ BUSINESS_PATH = '/v3/businesses/'  # Business ID will come after slash.
 
 # Defaults
 DEFAULT_TIME = time.strftime('%H:%M')  #get current time
-DEFAULT_LONGITUDE = -73.99429321289062
-DEFAULT_LATITUDE = 40.70544486444615
+DEFAULT_LONGITUDE = -73.984345
+DEFAULT_LATITUDE = 40.693899
 DEFAULT_RADIUS = 500 #meters
 DEFAULT_PRICE = 2 #means "$$". the program reads $$ as 3754, so need to use int to represent it
 DEFAULT_OFFSET = 0 #meters
 SEARCH_LIMIT = 50
+SORT_BY = "distance" # best_match, rating, review_count or distance
 
 #Price
-PRICE2NUM = {"$":1,"$$":2,"$$$":3,"$$$$":4,"None":5}
+PRICE = {1:"1",2:"1, 2",3:"1, 2, 3",4:"1, 2, 3, 4"}
 
 def request(host, path, api_key, url_params=None):
     """Given your API_KEY, send a GET request to the API.
@@ -84,12 +85,15 @@ def request(host, path, api_key, url_params=None):
 
     print(u'Querying {0} ...'.format(url))
 
+    start_time = time.time()
     response = requests.request('GET', url, headers=headers, params=url_params)
+    end_time = time.time()
+    print("time cost",end_time-start_time)
 
     return response.json()
 
 
-def search(api_key, current_time, longitude,latitude, radius, offset):
+def search(api_key, current_time, longitude,latitude, radius, price, offset):
     """Query the Search API by a search term and location.
     Args:
         term (str): The search term passed to the API.
@@ -109,13 +113,20 @@ def search(api_key, current_time, longitude,latitude, radius, offset):
     else:
         term = "dinner"
 
+    #############################################
+    #filter price
+    price = PRICE[price]
+
     url_params = {
         'term': term.replace(' ', '+'),
         'longitude': longitude,
         'latitude': latitude,
         "radius": radius,
+        "open_now":True,
+        "price": price,        
         'limit': SEARCH_LIMIT,
-        "offset":offset
+        "offset":offset,
+        "sort_by":SORT_BY
     }
     return request(API_HOST, SEARCH_PATH, api_key, url_params=url_params)
 
@@ -142,7 +153,7 @@ def query_api(current_time, longitude, latitude, radius, price):
     """
     restaurants = []
 
-    response = search(API_KEY, current_time, longitude, latitude, radius, DEFAULT_OFFSET)
+    response = search(API_KEY, current_time, longitude, latitude, radius, price, DEFAULT_OFFSET)
 
     total = response.get("total")
 
@@ -151,29 +162,33 @@ def query_api(current_time, longitude, latitude, radius, price):
         businesses = response.get('businesses')
         restaurants.extend(businesses)
 
-        num_page = (total-1)//SEARCH_LIMIT  # if 50, then just 1 page and the offset is 0
-
-        for num in range(1,num_page):
-            response = search(API_KEY, current_time, longitude, latitude, radius, num)
+        for num in range(SEARCH_LIMIT,total+1,SEARCH_LIMIT):
+            response = search(API_KEY, current_time, longitude, latitude, radius, price, num)
             businesses = response.get('businesses')
             restaurants.extend(businesses)
 
-    print("total",total)
+    print("total",total,"\n")
 
-    restaurants = list(filter(lambda x:x["is_closed"] is False and PRICE2NUM[x.get("price","None")]<=price,restaurants))
-    print("num of qualified restaurants",len(restaurants))
-
-    for each in restaurants:
-        print(each["distance"],"\n")
 
     output = []
     iteration = 0
     while iteration<3 and restaurants: #either find 3 restaurants or not enough qualified restaurants
         idx = random.randint(0,len(restaurants)-1)
-        print(idx)
-        print(restaurants[idx],"\n")
+        recommendation = {"name":restaurants[idx]["name"],'price':restaurants[idx]['price'],
+        'review_count':restaurants[idx]['review_count'],
+        'rating':restaurants[idx]['rating'],
+        'categories':restaurants[idx]['categories'],
+        'phone':restaurants[idx]['phone'],
+        'display_phone':restaurants[idx]['display_phone'],
+        'location':restaurants[idx]['location']['address1'],
+        "coordinates":restaurants[idx]["coordinates"],
+        'distance':restaurants[idx]['distance']}
+        output.append(recommendation)
+        print()
         restaurants.pop(idx)
         iteration+=1
+    result = json.dumps(output)
+    print(result)
 
             
     # print(businesses)
@@ -205,7 +220,7 @@ def main():
                         default=DEFAULT_LATITUDE, type=float,
                         help='Search latitude (default: %(default)s)')
     parser.add_argument('-r', '--radius', dest='radius',
-                        default=DEFAULT_RADIUS, type=float,
+                        default=DEFAULT_RADIUS, type=int,
                         help='Search radius (default: %(default)s)')
     parser.add_argument('-p', '--price', dest='price',
                         default=DEFAULT_PRICE, type=int,
