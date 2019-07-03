@@ -15,12 +15,5 @@
     "location": {"address1": "108-01 108th St", "address2": "", "address3": "", "city": "Rockaway Park", "zip_code": "11694", "country": "US", "state": "NY", "display_address": ["108-01 108th St", "Rockaway Park, NY 11694"]}, 
     "phone": "+17186343200", 
     "display_phone": "(718) 634-3200", 
-    "distance": 17491.074235749697}], 
-"total": 1, 
-"region": {"center": {"longitude": 40.693898, "latitude": -73.983991}}
-}
-
-
-
-
-
+    "distance": 17491.074235749697}]
+, "total": 1, "region": {"center": {"longitude": 40.693898, "latitude": -73.983991}}}
