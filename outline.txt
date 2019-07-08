@@ -1,0 +1,8 @@
+For restriction on restaurant number limit 
+with restaurants_all.py get as many restaurants attributes as possible
+1.Find restaurants in Manhattan, Brooklyn, Bronx, Queens, Staten Island (5*1000)
+2.Filter according to price $,$$,$$,$$$,$$$$  4times
+3.Best match and sort by rating, but popularity *3
+
+total: 5*1000*4*3 = 6w records
+then remove duplicates

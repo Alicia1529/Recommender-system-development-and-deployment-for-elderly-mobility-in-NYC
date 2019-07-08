@@ -166,7 +166,7 @@ def query_api(current_time, longitude, latitude, radius, price):
             response = search(API_KEY, current_time, longitude, latitude, radius, price, num)
             businesses = response.get('businesses')
             restaurants.extend(businesses)
-
+    print(restaurants)
     print("total",total,"\n")
 
 
