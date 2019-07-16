@@ -22,12 +22,12 @@ import sys
 import urllib
 import time
 import random
-import pickle
+
+from threading import Thread
+import threading
+
 #import api key
 import config
-
-DEFAULT_OFFSET = 0 #meters
-SEARCH_LIMIT = 50
 
 try:
     # For Python 3.0 and later
@@ -48,10 +48,21 @@ except ImportError:
 # https://www.yelp.com/developers/v3/manage_app
 API_KEY= config.api_key
 
+
 # API constants, you shouldn't have to change these.
 API_HOST = 'https://api.yelp.com'
 SEARCH_PATH = '/v3/businesses/search'
 BUSINESS_PATH = '/v3/businesses/'  # Business ID will come after slash.
+
+
+# Defaults
+
+GLOBAL_OFFSET = 0 #meters
+GLOBAL_LIMIT = 50
+GLOBAL_SORT_BY = "distance" # best_match, rating, review_count or distance
+
+#Price
+PRICE = {1:"1",2:"1, 2",3:"1, 2, 3",4:"1, 2, 3, 4"}
 
 def request(host, path, api_key, url_params=None):
     """Given your API_KEY, send a GET request to the API.
@@ -70,13 +81,14 @@ def request(host, path, api_key, url_params=None):
     headers = {
         'Authorization': 'Bearer %s' % api_key,
     }
-
+    start_time = time.time()
     response = requests.request('GET', url, headers=headers, params=url_params)
+    end_time = time.time()
 
     return response.json()
 
 
-def search(api_key, location, offset):
+def search(api_key, current_time, longitude,latitude, radius, price, offset, limit):
     """Query the Search API by a search term and location.
     Args:
         term (str): The search term passed to the API.
@@ -87,18 +99,46 @@ def search(api_key, location, offset):
         dict: The JSON response from the request.
     """
 
+    #############################################
+    #decide term eg: breakfast, brunch, lunch, dinner
+    if current_time <= "10:30":
+        term = "breakfast brunch"
+    elif current_time <= "14:00":
+        term = "brunch lunch"
+    else:
+        term = "dinner"
+
+    #############################################
+    #filter price
+    price = PRICE[price]
+
     url_params = {
-        'location': location,
-        'limit': SEARCH_LIMIT,
+        # 'term': term.replace(' ', '+'),
+        'longitude': longitude,
+        'latitude': latitude,
+        "radius": radius,
+        "open_now":True,
+        "price": price,        
+        'limit': limit,
         "offset":offset,
-        "price":"4",
-        "sort_by":"review_count"
+        "sort_by":GLOBAL_SORT_BY
     }
     return request(API_HOST, SEARCH_PATH, api_key, url_params=url_params)
 
 
+def get_business(api_key, business_id):
+    """Query the Business API by a business ID.
+    Args:
+        business_id (str): The ID of the business to query.
+    Returns:
+        dict: The JSON response from the request.
+    """
+    business_path = BUSINESS_PATH + business_id
 
-def query_api():
+    return request(API_HOST, business_path, api_key)
+
+
+def query_api(current_time, longitude, latitude, radius, price):
     """Queries the API by the input values from the user.
     Args:
         term (str): The search term to query.
@@ -106,91 +146,52 @@ def query_api():
         longitude (decimal): decimal	Required if location is not provided. Longitude of the location you want to search nearby.
         latitude (decimal): decimal	Required if location is not provided. Latitude of the location you want to search nearby.
     """
-    start_time = time.time()
     restaurants = []
 
-    # Manhattan
-    response = search(API_KEY, "Manhattan", 0)
-    businesses = response.get('businesses')
-    restaurants.extend(businesses)
-    print("Manhattan:",response.get("total"))
+    response = search(API_KEY, current_time, longitude, latitude, radius, price, GLOBAL_OFFSET,GLOBAL_LIMIT) #limit is 1
+    # only one restaurant in the response, but faster to retrieve data(take less time)
 
-    for num in range(SEARCH_LIMIT,1000,SEARCH_LIMIT):
-        print(num)
-        response = search(API_KEY, "Manhattan", num)
-        businesses = response.get("businesses")
-        restaurants.extend(businesses)
+    total = response.get("total")
+    # print("Number of restaurants returned by Yelp",total,"\n")
 
-    # Brooklyn
-    response = search(API_KEY, "Brooklyn", 0)
-    businesses = response.get('businesses')
-    restaurants.extend(businesses)
-    print("Brooklyn:",response.get("total"))
-
-    for num in range(SEARCH_LIMIT,1000,SEARCH_LIMIT):
-        print(num)
-        response = search(API_KEY, "Brooklyn", num)
-        try:
-            businesses = response.get('businesses')
-        except:
-            print(businesses)
-        restaurants.extend(businesses)
-
-    # The Bronx
-    response = search(API_KEY, "The Bronx", 0)
-    businesses = response.get('businesses')
-    restaurants.extend(businesses)
-    print("The Bronx:",response.get("total"))
-
-    for num in range(SEARCH_LIMIT,1000,SEARCH_LIMIT):
-        print(num)
-        response = search(API_KEY, "The Bronx", num)
+    if total!=0:
         businesses = response.get('businesses')
         restaurants.extend(businesses)
+        threads = []
 
-    # Queens
-    response = search(API_KEY, "Queens", 0)
-    businesses = response.get('businesses')
-    restaurants.extend(businesses)
-    print("Queens:",response.get("total"))
+        for num in range(GLOBAL_LIMIT,total+1,GLOBAL_LIMIT): #starting from the second one 
+            thread = Thread(target=threadRestaurants, args=(restaurants,API_KEY, current_time, longitude, latitude, radius, price, num, GLOBAL_LIMIT))
+            thread.start()
+            threads.append(thread)
 
-    for num in range(SEARCH_LIMIT,1000,SEARCH_LIMIT):
-        print(num)
-        response = search(API_KEY, "Queens", num)
-        businesses = response.get('businesses')
-        restaurants.extend(businesses)
+        for thread in threads:
+            thread.join()
+        end = time.time()
 
-    # Staten Island
-    response = search(API_KEY, "Staten Island", 0)
-    businesses = response.get('businesses')
-    restaurants.extend(businesses)
-    print("Staten Island:",response.get("total"))
+    return restaurants
 
-    for num in range(SEARCH_LIMIT,1000,SEARCH_LIMIT):
-        print(num)
-        response = search(API_KEY, "Staten Island", num)
-        businesses = response.get('businesses')
-        restaurants.extend(businesses)
+def threadRestaurants(restaurants,api_key, current_time, longitude,latitude, radius, price, offset, limit):
+    response = search(api_key, current_time, longitude,latitude, radius, price, offset, limit)
 
-    end_time = time.time()
-    print("request time",end_time-start_time)
-    pickle.dump(restaurants, open("data/restaurants_information/restaurants_nyc_4_reviewcount.pyc","wb"))
-    print("dump time",time.time()-end_time)
+    if response.get("businesses") is None:
+        print("Get wrong here",threading.get_ident())
+        print(response)
+        threadRestaurants(restaurants,api_key, current_time, longitude,latitude, radius, price, offset, limit)
+    else:   
+        restaurants.extend(response.get("businesses"))
 
 
 
-def main():
-    try:
-        query_api()
-    except HTTPError as error:
-        sys.exit(
-            'Encountered HTTP error {0} on {1}:\n {2}\nAbort program.'.format(
-                error.code,
-                error.url,
-                error.read(),
-            )
-        )
+if __name__ == "__main__":
+    DEFAULT_TIME = time.strftime('%H:%M')  #get current time
+    DEFAULT_LONGITUDE = -73.984345
+    DEFAULT_LATITUDE = 40.693899
+    DEFAULT_RADIUS = 1000 #meters
+    DEFAULT_PRICE = 2 #means "$$". the program reads $$ as 3754, so need to use int to represent it
 
+    start = time.time()
+    restaurants = query_api(DEFAULT_TIME, DEFAULT_LONGITUDE, DEFAULT_LATITUDE, DEFAULT_RADIUS,DEFAULT_PRICE )
+    end = time.time()
 
-if __name__ == '__main__':
-    main()
+    print("Number of restaurants actually retrieved",len(restaurants))
+    print("Total time it takes:",end-start)
