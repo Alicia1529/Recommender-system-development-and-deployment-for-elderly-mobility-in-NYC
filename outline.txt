@@ -1,3 +1,14 @@
+multithreading
+
+different matrix 
+
+back end: API + database
+
+The other project
+
+create table TESTBLOB(framenum int not null, feature blob not null);
+
+
 For restriction on restaurant number limit 
 with restaurants_all.py get as many restaurants attributes as possible
 1.Find restaurants in Manhattan, Brooklyn, Bronx, Queens, Staten Island (5*1000)

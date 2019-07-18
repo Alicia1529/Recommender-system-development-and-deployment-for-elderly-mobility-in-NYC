@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pylab as plt
 import pickle
 from random import sample 
+from collections import Counter 
 
 def linUCB(A, b, history, candidate_pool, alpha, context_size):
     # A: existant matrix for all resturants 
@@ -33,22 +34,30 @@ def linUCB(A, b, history, candidate_pool, alpha, context_size):
         A = A + np.outer(context, context)
         b = b + reward*np.reshape(context,(context_size,1))
 
-    
-    coefficient = np.dot(np.linalg.inv(A), b)
-    ucb = {}
-    for candidate in candidate_pool:
-        candidate_id = candidate[0]            
-        c_context = np.asarray(candidate[1:])
-        
-        sd = np.sqrt( np.dot(c_context.T,np.dot(np.linalg.inv(A), c_context)) ) 
+    if len(candidate_pool)==0:
+        #here we are not making predictions, but only update the parameters
+        prediction_ids = None
+    else:
+        coefficient = np.dot(np.linalg.inv(A), b)
+        ucb = {}
+        for candidate in candidate_pool:
+            candidate_id = candidate[0]            
+            c_context = np.asarray(candidate[1:])
+            
+            sd = np.sqrt( np.dot(c_context.T,np.dot(np.linalg.inv(A), c_context)) ) 
 
-        ucb[candidate_id] = np.asscalar(  np.dot(coefficient.T,c_context) + np.dot(alpha,sd) )
+            ucb[candidate_id] = np.asscalar(  np.dot(coefficient.T,c_context) + np.dot(alpha,sd) )
 
-    # Choose the restaurant with largest UCB
-    # prediction_id = maximum = max(ucb, key=ucb.get)
-    prediction_id = max(ucb, key=ucb.get)
+        # # Choose the restaurant with largest UCB
+        # # prediction_id = maximum = max(ucb, key=ucb.get)
+        # prediction_id = max(ucb, key=ucb.get)
 
-    return A, b, prediction_id
+        # give back all predictions 
+        # let the main.py program decides if some of them are recommended before
+        # and thus, recommend the next one that haven't be recommended before
+        prediction_ids = list(Counter(ucb))
+
+    return A, b, prediction_ids
 
 if __name__ == "__main__":
     print("Program starts...")
@@ -90,7 +99,12 @@ if __name__ == "__main__":
     #cumulative click through rate
     test_set_sampled = test_set[:1]
     # test_set_sampled = sample(test_set,50)
-    A, b, prediction = linUCB(None, None, train_set, test_set_sampled, alpha, context_size)
+    A, b, predictions = linUCB(None, None, train_set, test_set_sampled, alpha, context_size)
+
+    prediction = predictions[0]
+    #only give one result, highest ucb
+
+
     click_num = 0
     click_den = 0
     x = []#iternation 
@@ -109,8 +123,13 @@ if __name__ == "__main__":
         # print(test_set_sampled)
         context = id2context[prediction]
         result = [reward,prediction,context]
-        A, b, prediction = linUCB(A, b, [result], test_set_sampled, alpha, context_size) #it's learning 
+        A, b, predictions = linUCB(A, b, [result], test_set_sampled, alpha, context_size) #it's learning 
         # A, b, prediction = linUCB(A, b, [], test_set_sampled, 0.01, context_size) # not learning 
+        prediction = predictions[0]
+        #only give one result, highest ucb
+
+
+
         x.append(i/size)
         y.append(click_num/click_den)
         z.append(average)

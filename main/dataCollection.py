@@ -147,6 +147,7 @@ def query_api(current_time, longitude, latitude, radius, price):
         latitude (decimal): decimal	Required if location is not provided. Latitude of the location you want to search nearby.
     """
     restaurants = []
+    start = time.time()
 
     response = search(API_KEY, current_time, longitude, latitude, radius, price, GLOBAL_OFFSET,GLOBAL_LIMIT) #limit is 1
     # only one restaurant in the response, but faster to retrieve data(take less time)
@@ -166,7 +167,11 @@ def query_api(current_time, longitude, latitude, radius, price):
 
         for thread in threads:
             thread.join()
-        end = time.time()
+        
+    end = time.time()
+
+    print("Number of restaurants actually retrieved",len(restaurants))
+    print("Total time it takes:",end-start)
 
     return restaurants
 
@@ -189,9 +194,4 @@ if __name__ == "__main__":
     DEFAULT_RADIUS = 1000 #meters
     DEFAULT_PRICE = 2 #means "$$". the program reads $$ as 3754, so need to use int to represent it
 
-    start = time.time()
     restaurants = query_api(DEFAULT_TIME, DEFAULT_LONGITUDE, DEFAULT_LATITUDE, DEFAULT_RADIUS,DEFAULT_PRICE )
-    end = time.time()
-
-    print("Number of restaurants actually retrieved",len(restaurants))
-    print("Total time it takes:",end-start)
