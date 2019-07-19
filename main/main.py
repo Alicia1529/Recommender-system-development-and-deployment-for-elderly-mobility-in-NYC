@@ -165,12 +165,7 @@ if __name__ == "__main__":
         elif answer == "NONE":
             pass
         else:
-            updateReward(DEFAULT_USER_ID,DEFAULT_TIME,answer,1)
-
-
-
-        
+            updateReward(DEFAULT_USER_ID,DEFAULT_TIME,answer,1) 
     
     conn.close()
     
-    print(output)
