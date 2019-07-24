@@ -1,12 +1,34 @@
 const express = require('express');
 const app = express();
+var mysql = require('mysql');
+
+var con = mysql.createConnection({
+  host: "localhost",
+  user: "root",
+  password: "root",
+  port:8889,
+  database:'UrbanConnectorTest'
+});
 
 app.set('view engine', 'hbs');
 const path = require('path');
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: false }));
 
-app.get("/",(req,res)=>{
-  res.render("main",{})
+con.connect(function(err) {
+  if (err) throw err;
+  console.log("Connected!");
+
+
+  app.get("/",(req,res)=>{
+    con.query("SELECT * FROM history",function (error, results, fields){
+      res.render("history",{records:results})
+    })
+    
+  })
+
+  app.listen(3000);
+
 });
 
-app.listen(3000);
+

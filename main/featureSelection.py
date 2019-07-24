@@ -54,14 +54,14 @@ def addColumns(table, current_categories,positive):
 def featureSelection(data):
     restaurants = pd.DataFrame.from_records(data)
 
-    PRICE2NUM = {"$":1,"$$":2,"$$$":3,"$$$$":4,'£££':3,'££££':4}
+    # PRICE2NUM = {"$":1,"$$":2,"$$$":3,"$$$$":4,"£":1,"££":2,'£££':3,'££££':4}
    
     #make sure that all the values in the price columns are valid
     #filter out columns with NaN
     restaurants= restaurants.dropna(subset=['price'])
     # restaurants = restaurants[restaurants["price"] in PRICE2NUM.keys()]
-    
-    restaurants.price = restaurants.price.apply(lambda x: PRICE2NUM[x])
+    #use length directly, avoide error caused by other unseen price labels
+    restaurants.price = restaurants.price.apply(lambda x: len(x))
 
     # convert list of dicts to list of alias in the dic
     restaurants.categories = restaurants.categories.apply(lambda x:list(map(lambda cate:cate["alias"],x)))

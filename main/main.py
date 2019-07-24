@@ -50,7 +50,7 @@ except ImportError:
 # https://www.yelp.com/developers/v3/manage_app
 
 # make three predictions
-def makeRecommendation(user_id,time,longitude,latitude,radius,price):
+def makeRecommendation(user_id,time,longitude,latitude,radius,price,alpha,conn):
     cursor = conn.cursor()
 
     #delete recommendation made before 7 days
@@ -62,6 +62,9 @@ def makeRecommendation(user_id,time,longitude,latitude,radius,price):
     cursor.execute(query, (user_id))
     previousRecommendations = cursor.fetchall()
     previousRecommendations  = list(map(lambda x:x["restaurant_id"],previousRecommendations))
+
+    print("-----------------------")
+    print(time,longitude,latitude,radius,price)
 
     restaurants = query_api(time,longitude,latitude,radius,price)
     context_pool = featureSelection(restaurants)
@@ -108,7 +111,7 @@ def makeRecommendation(user_id,time,longitude,latitude,radius,price):
     output = json.dumps(output)
     return output
 
-def updateReward(user_id,time,restaurant_id,reward):
+def updateReward(user_id,time,restaurant_id,reward,alpha,conn):
     cursor = conn.cursor()
     #delete recommendation made before 7 days
     query = "DELETE FROM Recommendation WHERE timestamp < (NOW() - INTERVAL 7 DAY)"
@@ -157,7 +160,7 @@ if __name__ == "__main__":
     CONTINUE = True
 
     while CONTINUE:
-        output = makeRecommendation(DEFAULT_USER_ID,DEFAULT_TIME,DEFAULT_LONGITUDE,DEFAULT_LATITUDE,DEFAULT_RADIUS,DEFAULT_PRICE)
+        output = makeRecommendation(DEFAULT_USER_ID,DEFAULT_TIME,DEFAULT_LONGITUDE,DEFAULT_LATITUDE,DEFAULT_RADIUS,DEFAULT_PRICE,alpha,conn)
         print(output)
         answer = input("Please give your choice:\n")
         if answer == "END":
@@ -165,7 +168,7 @@ if __name__ == "__main__":
         elif answer == "NONE":
             pass
         else:
-            updateReward(DEFAULT_USER_ID,DEFAULT_TIME,answer,1) 
+            updateReward(DEFAULT_USER_ID,DEFAULT_TIME,answer,1,alpha,conn) 
     
     conn.close()
     

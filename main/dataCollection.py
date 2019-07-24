@@ -153,6 +153,7 @@ def query_api(current_time, longitude, latitude, radius, price):
     # only one restaurant in the response, but faster to retrieve data(take less time)
 
     total = response.get("total")
+    total = min(total,600-GLOBAL_LIMIT)
     # print("Number of restaurants returned by Yelp",total,"\n")
 
     if total!=0:
@@ -161,6 +162,9 @@ def query_api(current_time, longitude, latitude, radius, price):
         threads = []
 
         for num in range(GLOBAL_LIMIT,total+1,GLOBAL_LIMIT): #starting from the second one 
+            if (total>400 and num//GLOBAL_LIMIT>=5):
+                time.sleep(0.2)
+            print(time.time())
             thread = Thread(target=threadRestaurants, args=(restaurants,API_KEY, current_time, longitude, latitude, radius, price, num, GLOBAL_LIMIT))
             thread.start()
             threads.append(thread)
@@ -181,9 +185,13 @@ def threadRestaurants(restaurants,api_key, current_time, longitude,latitude, rad
     if response.get("businesses") is None:
         print("Get wrong here",threading.get_ident())
         print(response)
+        time.sleep(0.1)
         threadRestaurants(restaurants,api_key, current_time, longitude,latitude, radius, price, offset, limit)
+        print("f-----",time.time())
     else:   
         restaurants.extend(response.get("businesses"))
+        print("s-----",time.time())
+    
 
 
 
