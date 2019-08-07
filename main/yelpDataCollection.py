@@ -82,7 +82,7 @@ def request(host, path, api_key, url_params=None):
         'Authorization': 'Bearer %s' % api_key,
     }
 
-    response = requests.request('GET', url, headers=headers, params=url_params)
+    response = requests.request('GET', url, headers=headers, params=url_params,timeout = 5)
     # print("net response time",requests.request('GET', url, headers=headers, params=url_params).elapsed.total_seconds())
     
 
@@ -140,9 +140,9 @@ def query_api(current_time, longitude, latitude, radius, price):
    
     threads = []
 
-    for num in range(0,800+1-GLOBAL_LIMIT,GLOBAL_LIMIT): #starting from the second one 
+    for num in range(0,600+1-GLOBAL_LIMIT,GLOBAL_LIMIT): #starting from the second one 
         if (num//GLOBAL_LIMIT>=5):
-            time.sleep(0.2)
+            time.sleep(0.12)
         print(time.time())
         thread = Thread(target=threadRestaurants, args=(restaurants,API_KEY, current_time, longitude, latitude, radius, price, num, GLOBAL_LIMIT))
         thread.start()
