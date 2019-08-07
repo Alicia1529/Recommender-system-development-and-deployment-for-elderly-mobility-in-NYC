@@ -7,7 +7,7 @@ var con = mysql.createConnection({
   user: "root",
   password: "root",
   port:8889,
-  database:'UrbanConnectorTest'
+  database:'UrbanConnector'
 });
 
 app.set('view engine', 'hbs');
@@ -21,7 +21,7 @@ con.connect(function(err) {
 
 
   app.get("/",(req,res)=>{
-    con.query("SELECT * FROM history",function (error, results, fields){
+    con.query("SELECT * FROM UserRating",function (error, results, fields){
       res.render("history",{records:results})
     })
     

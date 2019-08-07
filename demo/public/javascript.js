@@ -11,21 +11,21 @@ function addZero(i) {
     }
     return i;
   }
-function like(event,user_id,restaurant_id){
+function like(event,user_id,restaurant_id,recommendation_time){
 
   const date = new Date()
   const time = addZero(date.getHours())+":"+addZero(date.getMinutes())
-  var url = `http://localhost:8000/feedback:${user_id}+${time}+${restaurant_id}+1`
+  var url = `http://localhost:8000/feedback:senior+${user_id}+${time}+${restaurant_id}+${recommendation_time}+1`
 
   fetch(url,{mode: 'cors',headers:{'Access-Control-Allow-Origin':'*' }})
     .then(function(response){
     })
     .catch(error => console.log('Error:', error));
 }
-function disLike(event,user_id,restaurant_id){
+function disLike(event,user_id,restaurant_id,recommendation_time){
   const date = new Date()
   const time = addZero(date.getHours())+":"+addZero(date.getMinutes())
-  var url = `http://localhost:8000/feedback:${user_id}+${time}+${restaurant_id}+0`
+  var url = `http://localhost:8000/feedback:senior+${user_id}+${time}+${restaurant_id}+${recommendation_time}+-0.1`
 
   fetch(url,{method:"GET",mode:'cors',headers:{'Access-Control-Allow-Origin':'*' }})
     .then(function(response){
@@ -39,6 +39,7 @@ function updateElement(node,index,info){
   node.setAttribute("value",info.id)
   node.setAttribute("class","recommendation-result");
   node.setAttribute("id","recommendation_num_"+index);
+  node.setAttribute("recommendation_time",info.recommendation_time);
   
   category = info.categories.map(x=>x["title"]).join("・");
   distance = Math.round(info.distance)
@@ -51,9 +52,9 @@ function updateElement(node,index,info){
   const call = document.querySelector(`#recommendation_num_${index} button[name="call"] `);
   const go = document.querySelector(`#recommendation_num_${index} button[name="go"] `);
   const dislike = document.querySelector(`#recommendation_num_${index} button[name="dislike"]`);
-  call.addEventListener("click",(event)=>{like(event,user_id,info.id)})
-  go.addEventListener("click",(event)=>{like(event,user_id,info.id)})
-  dislike.addEventListener("click",(event)=>{disLike(event,user_id,info.id)})
+  call.addEventListener("click",(event)=>{like(event,user_id,info.id,info.recommendation_time)})
+  go.addEventListener("click",(event)=>{like(event,user_id,info.id,info.recommendation_time)})
+  dislike.addEventListener("click",(event)=>{disLike(event,user_id,info.id,info.recommendation_time)})
   
   return node
   
@@ -69,10 +70,11 @@ function getRecommendation(){
     const date = new Date()
     const time = addZero(date.getHours())+":"+addZero(date.getMinutes())
 
-    var url = `http://localhost:8000/getRecommendation:${user_id}+${time}+${longitude}+${latitude}+${radius}+${price}`
+    var url = `http://localhost:8000/getRecommendation:senior+${user_id}+${time}+${longitude}+${latitude}+${radius}+${price}`
 
     fetch(url,{method:"GET"})
       .then(function(response){
+        console.log(response)
         if(response.status >= 200 && response.status < 300) {
           return response.json();
         }
@@ -82,6 +84,7 @@ function getRecommendation(){
       })
       .then(function(data){
         console.log(data)
+        data = data["success"]
         const root = document.getElementById("recommendation-box");
         for (let i=0;i<3;i++){
           node = document.getElementById("recommendation_num_"+i);

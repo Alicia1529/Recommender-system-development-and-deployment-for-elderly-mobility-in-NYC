@@ -61,15 +61,20 @@ def linUCB(A, b, history, candidate_pool, alpha, context_size):
 
 if __name__ == "__main__":
     print("Program starts...")
-    index = 1000
-    alpha = 1 
-
+    # how many training data 
+    # 1000 means to use the first 1000 records to train the model
+    # 0 means starts from the sratch
+    index = 0
+    # The parameter for the degree of exploration
+    alpha = 0.5
 
     input_file = "../data/simulated_arm_contexts.pyc"
 
     data = pickle.load(open(input_file,"rb"))
 
-    data = list(map(lambda x:x[:2]+x[6:],data)) #don't consider distance, rating, review_count, price
+    data = list(map(lambda x:x[:2]+x[6:],data.values.tolist())) 
+    # don't consider distance, rating, review_count, price
+    # as they are not part of the factors that generate the reward
     id2context = {}
 
     for each in data:
@@ -93,8 +98,8 @@ if __name__ == "__main__":
     average = len(total_positive)/len(data)
 
     # train the model, get parameters and prediction 
+    # number of candidates for each prediction
     size = 10
-
 
     #cumulative click through rate
     test_set_sampled = test_set[:1]
@@ -103,7 +108,6 @@ if __name__ == "__main__":
 
     prediction = predictions[0]
     #only give one result, highest ucb
-
 
     click_num = 0
     click_den = 0
@@ -127,8 +131,6 @@ if __name__ == "__main__":
         # A, b, prediction = linUCB(A, b, [], test_set_sampled, 0.01, context_size) # not learning 
         prediction = predictions[0]
         #only give one result, highest ucb
-
-
 
         x.append(i/size)
         y.append(click_num/click_den)
