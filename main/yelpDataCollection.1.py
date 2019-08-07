@@ -83,6 +83,7 @@ def request(host, path, api_key, url_params=None):
     }
 
     response = requests.request('GET', url, headers=headers, params=url_params)
+
     # print("net response time",requests.request('GET', url, headers=headers, params=url_params).elapsed.total_seconds())
     
 
@@ -137,20 +138,31 @@ def query_api(current_time, longitude, latitude, radius, price):
     """
     restaurants = []
     start = time.time()
-   
-    threads = []
 
-    for num in range(0,800+1-GLOBAL_LIMIT,GLOBAL_LIMIT): #starting from the second one 
-        if (num//GLOBAL_LIMIT>=5):
-            time.sleep(0.2)
-        print(time.time())
-        thread = Thread(target=threadRestaurants, args=(restaurants,API_KEY, current_time, longitude, latitude, radius, price, num, GLOBAL_LIMIT))
-        thread.start()
-        threads.append(thread)
+    response = search(API_KEY, current_time, longitude, latitude, radius, price, GLOBAL_OFFSET,GLOBAL_LIMIT) #limit is 1
+    # only one restaurant in the response, but faster to retrieve data(take less time)
+    end_first_request = time.time()
+    print("time it takes to make the first request",end_first_request-start)
 
-    for thread in threads:
-        thread.join()
+    total = response.get("total")
+    total = min(total,1000-GLOBAL_LIMIT)
+    print("Number of restaurants returned by Yelp",total,"\n")
 
+    if total!=0:
+        businesses = response.get('businesses')
+        restaurants.extend(businesses)
+        threads = []
+
+        for num in range(GLOBAL_LIMIT,total+1,GLOBAL_LIMIT): #starting from the second one 
+            if (total>400 and num//GLOBAL_LIMIT>=5):
+                time.sleep(0.2)
+            print(time.time())
+            thread = Thread(target=threadRestaurants, args=(restaurants,API_KEY, current_time, longitude, latitude, radius, price, num, GLOBAL_LIMIT))
+            thread.start()
+            threads.append(thread)
+
+        for thread in threads:
+            thread.join()
         
     end = time.time()
 
