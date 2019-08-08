@@ -67,7 +67,7 @@ INSERT INTO UserRating(user_id,restaurant_id,recommendation_time,user_selection_
 		
 ### 5. Main:
 
-1. yelDataCollection.py: used to make request to Yelp API and retrieve candidate restaurants information.
+1. yelDataCollection.py: make request to Yelp API and retrieve candidate restaurants information.
 (multithreading to increase the speed)
 
 run it directlly will give you some restaurants that satisfy your setting
