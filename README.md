@@ -32,26 +32,27 @@
 		
 ### Main:
 
-1.yelDataCollection.py: used to make request to Yelp API and retrieve candidate restaurants information.
+1. yelDataCollection.py: used to make request to Yelp API and retrieve candidate restaurants information.
 (multithreading to increase the speed)
 
 run it directlly will give you some restaurants that satisfy your setting
 
-2.featureExtraction.py: convert the text data to feature matrix.
+2. featureExtraction.py: convert the text data to feature matrix.
 
-3.linUCB.py: main recommendation algorithm using contextual bandit algorithm
+3. linUCB.py: main recommendation algorithm using contextual bandit algorithm
 you can run it directly to see the result of an offline evaluation
 
-4.main.py: main functions to implement the recommendation algorithm, like get and save matrices, make recommendations and update the result.
+4. main.py: main functions to implement the recommendation algorithm, like get and save matrices, make recommendations and update the result.
 
-5.app.py: web framework
+5. app.py: web framework
 
 	
 ### Two main services:
 
-1."<your domain>/getRecommendation:<user_profile>+<user_id>+<local_time>+<longitude>+<latitude>+<radius>+<price>"
+1. get recommendations -> return three restaurants(sometimes less than 3 because this are not enough restaurants)
 
 ```
+@app.route('/getRecommendation:<user_profile>+<user_id>+<local_time>+<longitude>+<latitude>+<radius>+<price>', methods=['GET'])
 def getRecommendation(user_profile, user_id, time, longitude, latitude, radius, price):
 # user_profile: string, eg: 'senior'
 # user_id: string, eg:'123124'
@@ -66,10 +67,10 @@ sample request:
 "GET /getRecommendation:senior+1231241412+2019-08-07T23:44:16-04:00+-73.984345+40.693899+2000+1 HTTP/1.1" 200 -
 
 
-
-2.'<your domain>/feedback:<user_profile>+<user_id>+<local_time>+<restaurant_id>+<recommendation_time>+<reward>'
+2. send users' feedback about the recommended restaurants
 
 ```
+@app.route('/feedback:<user_profile>+<user_id>+<local_time>+<restaurant_id>+<recommendation_time>+<reward>',methods=['GET'])
 def feedback(user_profile, user_id, local_time, restaurant_id, recommendation_time, reward):
 # user_profile: string, eg: 'senior'
 # user_id: string, eg:'123124'
