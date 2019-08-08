@@ -4,7 +4,8 @@
 
 ### 2. Configuration file:
 
-1. please create one python file under main folder with content([Yelp Fusion API](https://www.yelp.com/developers/documentation/v3))
+1. please create one python file under main folder `main/config.py` with Yelp API information([Yelp Fusion API](https://www.yelp.com/developers/documentation/v3))
+
 ```
 api_key = <your api key>
 client_id = <your client id>
@@ -18,12 +19,16 @@ app_name = <the name of your app>
 
 2. import file "/database/database_setup.sql" to create two tables
 
+3. change database setting and connect to database: 
+
+	A. If you want to run this individual file and test the program with terminal, then modify the corresponding part in [main/main.py](https://github.com/Alicia1529/Recommender-system-development-and-deployment-for-elderly-mobility-in-NYC/blob/12fa12d4ec46f4045517532d894e3ae1a49e2240/main/main.py#L280-L287) 
+	
+	B. To change the database of the webservice, modify [main/app.py](https://github.com/Alicia1529/Recommender-system-development-and-deployment-for-elderly-mobility-in-NYC/blob/12fa12d4ec46f4045517532d894e3ae1a49e2240/main/app.py#L18-L24)
+
+	
 3. change the database setting in the following files to your own database:
 
-	A. main/app.py [change the database of the webservice](https://github.com/Alicia1529/Recommender-system-development-and-deployment-for-elderly-mobility-in-NYC/blob/12fa12d4ec46f4045517532d894e3ae1a49e2240/main/app.py#L18-L24)
 
-	B. main/main.py [if you want to run this individual file and test the program with terminal](https://github.com/Alicia1529/Recommender-system-development-and-deployment-for-elderly-mobility-in-NYC/blob/12fa12d4ec46f4045517532d894e3ae1a49e2240/main/main.py#L280-L287)
-	
 	C. all modifications to the database:
 	
 	1. [update the RecommendationsSevenDays table](https://github.com/Alicia1529/Recommender-system-development-and-deployment-for-elderly-mobility-in-NYC/blob/12fa12d4ec46f4045517532d894e3ae1a49e2240/main/main.py#L90-L94)
