@@ -1,26 +1,26 @@
 ## SETUP
 ### 1. Notice:
 
-1. please keep of positive word array in "preprocessing/pca_model_training.ipynb","preprocessing/data_stimulation.ipynb/" consistent
+1. Please keep of positive word array in "preprocessing/pca_model_training.py","preprocessing/data_stimulation.py/","main/featureExtraction.py" consistent
 
 ### 2. Configuration file:
 
-1. please create one python file under main folder `main/config.py` with Yelp API information([Yelp Fusion API](https://www.yelp.com/developers/documentation/v3))
+1. Please create one python file under main folder `main/config.py` with Yelp API information([Yelp Fusion API](https://www.yelp.com/developers/documentation/v3))
 
 ```
 api_key = <your api key>
 client_id = <your client id>
 app_name = <the name of your app>
 ```
-2. remove all current data files under `main/model/`(they will be generated again)
+2. Remove all current data files under `main/model/`(they will be generated again)
 
 ### 3. Database Setup:
 
-1. create a database called `UrbanConnector` in MySQL
+1. Create a database called `UrbanConnector` in MySQL
 
-2. import file `/database/database_setup.sql` to create three tables:`AllRecommendations`,`RecommendationsSevenDays`,`UserRating`
+2. Import file `/database/database_setup.sql` to create three tables:`AllRecommendations`,`RecommendationsSevenDays`,`UserRating`
 
-3. change database setting and connect to database: 
+3. Change database setting and connect to database: 
 
 	A. If you want to run this individual file and test the program with terminal, then modify the corresponding part in [main/main.py](https://github.com/Alicia1529/Recommender-system-development-and-deployment-for-elderly-mobility-in-NYC/blob/12fa12d4ec46f4045517532d894e3ae1a49e2240/main/main.py#L280-L287) 
 	
@@ -29,13 +29,13 @@ app_name = <the name of your app>
 	
 4. (Optional)Test if the database is set up correctly(all modifications to the database):
 	
-	1. [update the RecommendationsSevenDays table](https://github.com/Alicia1529/Recommender-system-development-and-deployment-for-elderly-mobility-in-NYC/blob/12fa12d4ec46f4045517532d894e3ae1a49e2240/main/main.py#L90-L94)
+	1. [Update the RecommendationsSevenDays table](https://github.com/Alicia1529/Recommender-system-development-and-deployment-for-elderly-mobility-in-NYC/blob/12fa12d4ec46f4045517532d894e3ae1a49e2240/main/main.py#L90-L94)
 	
 		test: `DELETE FROM RecommendationsSevenDays WHERE recommendation_time < (NOW() - INTERVAL 7 DAY)`
 
-	2. [query recommendations for this user in the past 7 days](https://github.com/Alicia1529/Recommender-system-development-and-deployment-for-elderly-mobility-in-NYC/blob/12fa12d4ec46f4045517532d894e3ae1a49e2240/main/main.py#L103-L105)
+	2. [Query recommendations for this user in the past 7 days](https://github.com/Alicia1529/Recommender-system-development-and-deployment-for-elderly-mobility-in-NYC/blob/12fa12d4ec46f4045517532d894e3ae1a49e2240/main/main.py#L103-L105)
 
-	3. make recommendations and update both AllRecommendations RecommendationsSevenDays 
+	3. Make recommendations and update both AllRecommendations RecommendationsSevenDays 
 	[query](https://github.com/Alicia1529/Recommender-system-development-and-deployment-for-elderly-mobility-in-NYC/blob/12fa12d4ec46f4045517532d894e3ae1a49e2240/main/main.py#L149-L150)
 	[execution1](https://github.com/Alicia1529/Recommender-system-development-and-deployment-for-elderly-mobility-in-NYC/blob/12fa12d4ec46f4045517532d894e3ae1a49e2240/main/main.py#L165-L175)
 	[execution2](https://github.com/Alicia1529/Recommender-system-development-and-deployment-for-elderly-mobility-in-NYC/blob/12fa12d4ec46f4045517532d894e3ae1a49e2240/main/main.py#L212-L222)
@@ -46,11 +46,11 @@ app_name = <the name of your app>
 
 		INSERT INTO `RecommendationsSevenDays`(user_id, restaurant_id, recommendation_time) VALUES (1231241412,brLV35q22JnxSekUm1Wt8A,2019-08-08 00:45:00)
 
-	4. [update user profile according to the response](https://github.com/Alicia1529/Recommender-system-development-and-deployment-for-elderly-mobility-in-NYC/blob/12fa12d4ec46f4045517532d894e3ae1a49e2240/main/main.py#L248-L256)
+	4. [Update user profile according to the response](https://github.com/Alicia1529/Recommender-system-development-and-deployment-for-elderly-mobility-in-NYC/blob/12fa12d4ec46f4045517532d894e3ae1a49e2240/main/main.py#L248-L256)
 
-```
-INSERT INTO UserRating(user_id,restaurant_id,recommendation_time,user_selection_time,reward) VALUES(1231241412,brLV35q22JnxSekUm1Wt8A,2019-08-08 00:45:00,CURRENT_TIMESTAMP,1.0)
-```
+		```
+		INSERT INTO UserRating(user_id,restaurant_id,recommendation_time,user_selection_time,reward) VALUES(1231241412,brLV35q22JnxSekUm1Wt8A,2019-08-08 00:45:00,CURRENT_TIMESTAMP,1.0)
+		```
 ## Descriptions
 ### 1. Preprocessing:
 
@@ -62,7 +62,7 @@ INSERT INTO UserRating(user_id,restaurant_id,recommendation_time,user_selection_
 
 	output: /main/pca_model.sav
 
-3. offline_evaluation_data_simulation.ipynb: generated synthetic data (food preference) to test the algorithm, but much of the part is similar to pca_model_training program.
+3. offline_evaluation_data_simulation.py: generated synthetic data (food preference) to test the algorithm, but much of the part is similar to pca_model_training program.
 
 	output: /data/simulated_arm_contexts.pyc 
 		
@@ -83,7 +83,7 @@ you can run it directly to see results of an offline evaluation
 	
 ### 3. Two main services:
 
-1. get recommendations -> return three restaurants(sometimes less than 3 options because there are not enough restaurants)
+1. Get recommendations -> return three restaurants(sometimes less than 3 options because there are not enough restaurants)
 
 ```
 @app.route('/getRecommendation:<user_profile>+<user_id>+<local_time>+<longitude>+<latitude>+<radius>+<price>', methods=['GET'])
@@ -234,7 +234,7 @@ body:{
 ```
 
 
-2. send users' feedback about the recommended restaurants
+2. Send users' feedback about the recommended restaurants
 
 ```
 @app.route('/feedback:<user_profile>+<user_id>+<local_time>+<restaurant_id>+<recommendation_time>+<reward>',methods=['GET'])
