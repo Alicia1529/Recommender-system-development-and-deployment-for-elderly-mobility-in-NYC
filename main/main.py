@@ -212,9 +212,11 @@ def make_recommendation(user_profile, user_id, local_time, longitude, latitude, 
                 """------database modification------"""
                 # first: update the database for all recommendations  
                 # this has to be made ealier than the second one, because there are the primary key 
+                print("fixme",query0%(user_id,each,CURRENT_TIME,context,local_time))
                 cursor.execute(query0,(user_id,each,CURRENT_TIME,context,local_time))
 
                 # update the database for the past 7 days storage
+                print("fixme",query1%(user_id,each,CURRENT_TIME))
                 cursor.execute(query1,(user_id,each,CURRENT_TIME))
                 
                 # they have to use the same user_id,each, current_time because they are key and are referencing each other
@@ -243,34 +245,37 @@ def make_recommendation(user_profile, user_id, local_time, longitude, latitude, 
 def update_reward(user_profile, user_id, local_time, restaurant_id, recommendation_time, reward, alpha, conn):
     cursor = conn.cursor()
 
-    try: 
-        """------database modification------"""
-        query = "SELECT context FROM AllRecommendations where user_id = %s and restaurant_id = %s and recommendation_time = %s"
-        cursor.execute(query, (user_id, restaurant_id, recommendation_time))
-        a = cursor.fetchone()
-        context = json.loads(a["context"])
+    # try: 
+    """------database modification------"""
+    query = "SELECT context FROM AllRecommendations where user_id = %s and restaurant_id = %s and recommendation_time = %s"
+    print("fixme",query%(user_id, restaurant_id, recommendation_time))
+    cursor.execute(query, (user_id, restaurant_id, recommendation_time))
+    a = cursor.fetchone()
+    context = json.loads(a["context"])
 
-        #store this feedback to UserRating
-        query = "INSERT INTO UserRating(user_id,restaurant_id,recommendation_time,user_selection_time,reward) VALUES(%s,%s,%s,CURRENT_TIMESTAMP,%s)"
-        cursor.execute(query, (user_id, restaurant_id, recommendation_time, reward))
-        conn.commit()
-        """------database modification------"""
+    #store this feedback to UserRating
+    query = "INSERT INTO UserRating(user_id,restaurant_id,recommendation_time,user_selection_time,reward) VALUES(%s,%s,%s,CURRENT_TIMESTAMP,%s)"
+    cursor.execute(query, (user_id, restaurant_id, recommendation_time, reward))
+    print("fixme",query%(user_id, restaurant_id, recommendation_time,reward))
+    conn.commit()
+    """------database modification------"""
 
-        result = [reward, restaurant_id, context]
+    result = [reward, restaurant_id, context]
 
-        A, b = get_matrices(user_profile, local_time)
-        # A and b both have three matrices, one for morning, one for afternoon and one for evening
-        # now, get the matrices according to time 
-        # if there is no matrcies stored, then start  with None
+    A, b = get_matrices(user_profile, local_time)
+    # A and b both have three matrices, one for morning, one for afternoon and one for evening
+    # now, get the matrices according to time 
+    # if there is no matrcies stored, then start  with None
 
-        A, b, _ = linUCB(A, b, [result], [], alpha, len(context)) #it's learning 
-        save_matrices(user_profile,A, b, local_time)
-        return 200
+    A, b, _ = linUCB(A, b, [result], [], alpha, len(context)) #it's learning 
+    save_matrices(user_profile, A, b, local_time)
+    
+    return 200
     # extreme case: the database is shut down, all records in table AllRecommendations get lost
     # when user make a selection and try to match it with the previous context, failed
-    except:
-        print("Try to insert a record, but doesn't conform to the foreign key policy")
-        return 500
+    # except:
+    #     print("Try to insert a record, but doesn't conform to the foreign key policy")
+    #     return 500
 
 
 
