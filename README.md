@@ -1,9 +1,19 @@
-### Notice:
+### 1. Notice:
 
 1. please keep of positive word array in "preprocessing/pca_model_training.ipynb","preprocessing/data_stimulation.ipynb/" consistent
 
+### 2. Configuration file:
 
-### Database Setup:
+1. please create one python file under main folder with content(all information are from yelp)
+```
+api_key = <your api key>
+client_id = <your client id>
+app_name = <the name of your app>
+
+```
+2. remove all current data files under `main/model/`(they will be generated again)
+
+### 3. Database Setup:
 
 1. create a database called `UrbanConnector` in MySQL
 
@@ -40,7 +50,7 @@ INSERT INTO `RecommendationsSevenDays`(user_id, restaurant_id, recommendation_ti
 INSERT INTO UserRating(user_id,restaurant_id,recommendation_time,user_selection_time,reward) VALUES(1231241412,brLV35q22JnxSekUm1Wt8A,2019-08-08 00:45:00,CURRENT_TIMESTAMP,1.0)
 ```
 
-### Preprocessing:
+### 4. Preprocessing:
 
 1. get_restaurant_data.py: get around 5w restaurant records from Yelp API to train PCA model and for offline evaluation
 
@@ -54,7 +64,7 @@ INSERT INTO UserRating(user_id,restaurant_id,recommendation_time,user_selection_
 
 	output: /simulated_arm_contexts.pyc (but now it's moved to /data folder)
 		
-### Main:
+### 5. Main:
 
 1. yelDataCollection.py: used to make request to Yelp API and retrieve candidate restaurants information.
 (multithreading to increase the speed)
@@ -71,7 +81,7 @@ you can run it directly to see the result of an offline evaluation
 5. app.py: web framework
 
 	
-### Two main services:
+### 6. Two main services:
 
 1. get recommendations -> return three restaurants(sometimes less than 3 because this are not enough restaurants)
 
@@ -266,7 +276,7 @@ __proto__: Response
  printed line: "Try to insert a record, but doesn't conform to the foreign key policy"
 ```
 
-### Others:
+### 7. Others:
 To install the dependencies, run: `pip install -r requirements.txt`
 
 To start the web services, run under main folder `python app.py`
