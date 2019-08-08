@@ -113,12 +113,23 @@ def make_recommendation(user_profile, user_id, local_time, longitude, latitude, 
 
     # there are too no restaurants available because the radius is too small or the price preference is very strict
     if len(restaurants) == 0:
-        return json.dumps({"error":"please relax restrictions of radius or price prference"})
+        return json.dumps({"error":"please relax restrictions of radius or price prference: no restaurants available"})
 
-    # convert the text data to feature matrix
-    context_pool = featureExtraction(restaurants)
-    context_size = len(context_pool[0])-1 # remove arm
-    id2context = {}
+    # convert the text data to feature matrix  
+    # try:
+    #     context_pool = featureExtraction(restaurants)
+    #     context_size = len(context_pool[0])-1 # remove arm
+    #     id2context = {}
+    # except:
+    #     return json.dumps({"error":"please relax restrictions of radius or price prference: no qualified restaurants available"})
+    try:
+        context_pool = featureExtraction(restaurants)
+        context_size = len(context_pool[0])-1 # remove arm
+        id2context = {}
+
+    except:
+        return json.dumps({"error":"no qualified destinations"})
+
 
     # record the context information
     for each in context_pool:

@@ -46,11 +46,11 @@ def make_recommendation(user_profile, user_id, local_time, longitude, latitude, 
     price = int(price)
     return main.make_recommendation(user_profile, user_id, local_time, longitude, latitude, radius, price, __ALPHA__, conn)
 
-@app.route('/feedback:<user_profile>+<user_id>+<time>+<restaurant_id>+<recommendation_time>+<reward>',methods=['GET'])
-def feedback(user_profile, user_id, time, restaurant_id, recommendation_time, reward):
+@app.route('/feedback:<user_profile>+<user_id>+<local_time>+<restaurant_id>+<recommendation_time>+<reward>',methods=['GET'])
+def feedback(user_profile, user_id, local_time, restaurant_id, recommendation_time, reward):
     # reward = int(reward)
     reward = float(reward)
-    main.update_reward(user_profile, user_id, time, restaurant_id, recommendation_time, reward, __ALPHA__, conn)
+    main.update_reward(user_profile, user_id, local_time, restaurant_id, recommendation_time, reward, __ALPHA__, conn)
     response = make_response(jsonify({"statusCode": 200}))
     response.headers['Access-Control-Allow-Origin'] = '*'
     response.headers['Access-Control-Allow-Methods'] = 'OPTIONS,HEAD,GET,POST'
