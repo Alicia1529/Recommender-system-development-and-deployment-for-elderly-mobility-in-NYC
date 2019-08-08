@@ -17,7 +17,7 @@ app_name = <the name of your app>
 
 1. create a database called `UrbanConnector` in MySQL
 
-2. import file "/database/database_setup.sql" to create two tables
+2. import file `/database/database_setup.sql` to create three tables:`AllRecommendations`,`RecommendationsSevenDays`,`UserRating`
 
 3. change database setting and connect to database: 
 
@@ -26,12 +26,10 @@ app_name = <the name of your app>
 	B. To change the database of the webservice, modify [main/app.py](https://github.com/Alicia1529/Recommender-system-development-and-deployment-for-elderly-mobility-in-NYC/blob/12fa12d4ec46f4045517532d894e3ae1a49e2240/main/app.py#L18-L24)
 
 	
-3. change the database setting in the following files to your own database:
-
-
-	C. all modifications to the database:
+4. (Optional)Test if the database is set up correctly(all modifications to the database):
 	
 	1. [update the RecommendationsSevenDays table](https://github.com/Alicia1529/Recommender-system-development-and-deployment-for-elderly-mobility-in-NYC/blob/12fa12d4ec46f4045517532d894e3ae1a49e2240/main/main.py#L90-L94)
+	
 		test: `DELETE FROM RecommendationsSevenDays WHERE recommendation_time < (NOW() - INTERVAL 7 DAY)`
 
 	2. [query recommendations for this user in the past 7 days](https://github.com/Alicia1529/Recommender-system-development-and-deployment-for-elderly-mobility-in-NYC/blob/12fa12d4ec46f4045517532d894e3ae1a49e2240/main/main.py#L103-L105)
