@@ -37,17 +37,21 @@ from yelpDataCollection import query_api
 # remove those that are longer than 7 days
 
 
-def get_matrices(user_profile, time):
+def get_matrices(user_profile, local_time):
     A = None
     b = None
 
-    if time <= "10:30":
+    #local_time:'2019-08-07T19:48-04:00'
+    #local_time[11:16]: 10:48
+    hour_minute = local_time[11:16]
+
+    if hour_minute <= "10:30":
         try:
             A = pickle.load(open("model/"+user_profile+"_A1.pyc", "rb"))
             b = pickle.load(open("model/"+user_profile+"_b1.pyc", "rb"))
         except:
             pass
-    elif time <= "14:00":
+    elif hour_minute <= "14:00":
         try:
             A = pickle.load(open("model/"+user_profile+"_A2.pyc", "rb"))
             b = pickle.load(open("model/"+user_profile+"_b2.pyc", "rb"))
@@ -63,12 +67,12 @@ def get_matrices(user_profile, time):
 
 
 
-def save_matrices(user_profile, A, b, time):
-    if time <= "10:30":
+def save_matrices(user_profile, A, b, local_time):
+    if local_time <= "10:30":
         pickle.dump(A, open("model/"+user_profile+"_A1.pyc", "wb"))
         pickle.dump(b, open("model/"+user_profile+"_b1.pyc", "wb"))
 
-    elif time <= "14:00":
+    elif local_time <= "14:00":
         pickle.dump(A, open("model/"+user_profile+"_A2.pyc", "wb"))
         pickle.dump(b, open("model/"+user_profile+"_b2.pyc", "wb"))
 
@@ -90,7 +94,7 @@ def update_database(conn):
     """------database modification------"""
 
 # make three predictions
-def make_recommendation(user_profile, user_id, time, longitude, latitude, radius, price, alpha, conn):
+def make_recommendation(user_profile, user_id, local_time, longitude, latitude, radius, price, alpha, conn):
     cursor = conn.cursor()
     # get all restaurants recommended in recent 7 days
     # avoid making them again
@@ -104,7 +108,8 @@ def make_recommendation(user_profile, user_id, time, longitude, latitude, radius
     previousRecommendations  = list(map(lambda x:x["restaurant_id"], previousRecommendations))
 
     # retrieve restaurants according to api
-    restaurants = query_api(time, longitude, latitude, radius, price)
+    hour_minute = local_time[11:16]
+    restaurants = query_api(hour_minute, longitude, latitude, radius, price)
 
     # there are too no restaurants available because the radius is too small or the price preference is very strict
     if len(restaurants) == 0:
@@ -119,7 +124,7 @@ def make_recommendation(user_profile, user_id, time, longitude, latitude, radius
     for each in context_pool:
         id2context[each[0]] = each[1:]
 
-    A, b = get_matrices(user_profile,time)
+    A, b = get_matrices(user_profile,local_time)
     # A and b both have three matrices, one for morning, one for afternoon and one for evening
     # now, get the matrices according to time 
     # if there is no matrcies stored, then start  with None
@@ -149,7 +154,7 @@ def make_recommendation(user_profile, user_id, time, longitude, latitude, radius
             """------database modification------"""
             # first: update the database for all recommendations  
             # this has to be made ealier than the second one, because there are the primary key 
-            cursor.execute(query0, (user_id, each, CURRENT_TIME, context, time))
+            cursor.execute(query0, (user_id, each, CURRENT_TIME, context, local_time))
 
             # update the database for the past 7 days storage
             cursor.execute(query1, (user_id, each, CURRENT_TIME))
@@ -196,7 +201,7 @@ def make_recommendation(user_profile, user_id, time, longitude, latitude, radius
                 """------database modification------"""
                 # first: update the database for all recommendations  
                 # this has to be made ealier than the second one, because there are the primary key 
-                cursor.execute(query0,(user_id,each,CURRENT_TIME,context,time))
+                cursor.execute(query0,(user_id,each,CURRENT_TIME,context,local_time))
 
                 # update the database for the past 7 days storage
                 cursor.execute(query1,(user_id,each,CURRENT_TIME))
@@ -224,7 +229,7 @@ def make_recommendation(user_profile, user_id, time, longitude, latitude, radius
 
     return json.dumps({"success":output})
 
-def update_reward(user_profile, user_id, time, restaurant_id, recommendation_time, reward, alpha, conn):
+def update_reward(user_profile, user_id, local_time, restaurant_id, recommendation_time, reward, alpha, conn):
     cursor = conn.cursor()
 
     try: 
@@ -242,13 +247,13 @@ def update_reward(user_profile, user_id, time, restaurant_id, recommendation_tim
 
         result = [reward, restaurant_id, context]
 
-        A, b = get_matrices(user_profile, time)
+        A, b = get_matrices(user_profile, local_time)
         # A and b both have three matrices, one for morning, one for afternoon and one for evening
         # now, get the matrices according to time 
         # if there is no matrcies stored, then start  with None
 
         A, b, _ = linUCB(A, b, [result], [], alpha, len(context)) #it's learning 
-        save_matrices(user_profile,A, b, time)
+        save_matrices(user_profile,A, b, local_time)
         return 200
     # extreme case: the database is shut down, all records in table AllRecommendations get lost
     # when user make a selection and try to match it with the previous context, failed
@@ -271,7 +276,8 @@ if __name__ == "__main__":
 
     # Defaults
     DEFAULT_USER_ID = "10000000" #get current time
-    DEFAULT_TIME = time.strftime('%H:%M')  #get current time
+    # DEFAULT_TIME = time.strftime('%H:%M')  #get current time
+    LOCAL_TIME = datetime.datetime.now().astimezone().isoformat(timespec='seconds') #'2019-08-07T19:48-04:00'
     DEFAULT_LONGITUDE = -73.984345
     DEFAULT_LATITUDE = 40.693899
     DEFAULT_RADIUS = 1000 #meters
@@ -281,7 +287,7 @@ if __name__ == "__main__":
     CONTINUE = True
 
     while CONTINUE:
-        output = make_recommendation("senior", DEFAULT_USER_ID, DEFAULT_TIME, DEFAULT_LONGITUDE, DEFAULT_LATITUDE, DEFAULT_RADIUS, DEFAULT_PRICE, ALPHA, conn)
+        output = make_recommendation("senior", DEFAULT_USER_ID, LOCAL_TIME, DEFAULT_LONGITUDE, DEFAULT_LATITUDE, DEFAULT_RADIUS, DEFAULT_PRICE, ALPHA, conn)
         print(output)
         answer = input("Please give your choice(END means to terminate the program):\n")
 
@@ -292,6 +298,6 @@ if __name__ == "__main__":
         else:
             output = json.loads(output)["success"]
             recommendation_time = list(filter(lambda x: x["id"] == answer, output))[0]["recommendation_time"]
-            update_reward("senior", DEFAULT_USER_ID, DEFAULT_TIME, answer, recommendation_time, 1, ALPHA, conn) 
+            update_reward("senior", DEFAULT_USER_ID, LOCAL_TIME, answer, recommendation_time, 1, ALPHA, conn) 
     conn.close()
     

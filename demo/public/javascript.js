@@ -1,4 +1,25 @@
+function getCurrentISOtime(){
+  Date.prototype.toIsoString = function() {
+    var tzo = -this.getTimezoneOffset(),
+        dif = tzo >= 0 ? '+' : '-',
+        pad = function(num) {
+            var norm = Math.floor(Math.abs(num));
+            return (norm < 10 ? '0' : '') + norm;
+        };
+    return this.getFullYear() +
+        '-' + pad(this.getMonth() + 1) +
+        '-' + pad(this.getDate()) +
+        'T' + pad(this.getHours()) +
+        ':' + pad(this.getMinutes()) +
+        ':' + pad(this.getSeconds()) +
+        dif + pad(tzo / 60) +
+        ':' + pad(tzo % 60);
+  }
 
+  var dt = new Date();
+  return dt.toIsoString()
+
+}
 
 function showRadius(){
     const value = document.getElementById("radius").value;
@@ -13,9 +34,8 @@ function addZero(i) {
   }
 function like(event,user_id,restaurant_id,recommendation_time){
 
-  const date = new Date()
-  const time = addZero(date.getHours())+":"+addZero(date.getMinutes())
-  var url = `http://localhost:8000/feedback:senior+${user_id}+${time}+${restaurant_id}+${recommendation_time}+1`
+  const local_time = getCurrentISOtime()
+  var url = `http://localhost:8000/feedback:senior+${user_id}+${local_time}+${restaurant_id}+${recommendation_time}+1`
 
   fetch(url,{mode: 'cors',headers:{'Access-Control-Allow-Origin':'*' }})
     .then(function(response){
@@ -23,9 +43,8 @@ function like(event,user_id,restaurant_id,recommendation_time){
     .catch(error => console.log('Error:', error));
 }
 function disLike(event,user_id,restaurant_id,recommendation_time){
-  const date = new Date()
-  const time = addZero(date.getHours())+":"+addZero(date.getMinutes())
-  var url = `http://localhost:8000/feedback:senior+${user_id}+${time}+${restaurant_id}+${recommendation_time}+-0.1`
+  const local_time = getCurrentISOtime()
+  var url = `http://localhost:8000/feedback:senior+${user_id}+${local_time}+${restaurant_id}+${recommendation_time}+-0.1`
 
   fetch(url,{method:"GET",mode:'cors',headers:{'Access-Control-Allow-Origin':'*' }})
     .then(function(response){
@@ -67,10 +86,10 @@ function getRecommendation(){
     const latitude = document.getElementById("latitude").value;
     const radius = document.getElementById("radius").value;
     const price = document.getElementById("price").value;
-    const date = new Date()
-    const time = addZero(date.getHours())+":"+addZero(date.getMinutes())
 
-    var url = `http://localhost:8000/getRecommendation:senior+${user_id}+${time}+${longitude}+${latitude}+${radius}+${price}`
+    const local_time = getCurrentISOtime()
+
+    var url = `http://localhost:8000/getRecommendation:senior+${user_id}+${local_time}+${longitude}+${latitude}+${radius}+${price}`
 
     fetch(url,{method:"GET"})
       .then(function(response){

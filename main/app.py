@@ -27,7 +27,7 @@ conn = pymysql.connect(host='localhost',
 # update the RecommendationsSevenDays once every morning at 5 am
 scheduler = BackgroundScheduler()
 start_time = datetime(2019, 8, 2, 5, 00, 00)
-scheduler.add_job(main.update_database, "interval",days=1,start_date=start_time,args=[conn])
+scheduler.add_job(main.update_database, "interval", days=1, start_date=start_time, args=[conn])
 scheduler.start()
 
 
@@ -38,16 +38,16 @@ def default():
     return "Urban Connector"
 
 
-@app.route('/getRecommendation:<user_profile>+<user_id>+<time>+<longitude>+<latitude>+<radius>+<price>', methods=['GET'])
-def make_recommendation(user_profile,user_id,time,longitude,latitude,radius,price):
+@app.route('/getRecommendation:<user_profile>+<user_id>+<local_time>+<longitude>+<latitude>+<radius>+<price>', methods=['GET'])
+def make_recommendation(user_profile, user_id, local_time, longitude, latitude, radius, price):
     longitude = float(longitude)
     latitude = float(latitude)
     radius = int(radius)
     price = int(price)
-    return main.make_recommendation(user_profile, user_id, time, longitude, latitude, radius, price, __ALPHA__, conn)
+    return main.make_recommendation(user_profile, user_id, local_time, longitude, latitude, radius, price, __ALPHA__, conn)
 
 @app.route('/feedback:<user_profile>+<user_id>+<time>+<restaurant_id>+<recommendation_time>+<reward>',methods=['GET'])
-def feedback(user_profile,user_id,time,restaurant_id,recommendation_time,reward):
+def feedback(user_profile, user_id, time, restaurant_id, recommendation_time, reward):
     # reward = int(reward)
     reward = float(reward)
     main.update_reward(user_profile, user_id, time, restaurant_id, recommendation_time, reward, __ALPHA__, conn)
