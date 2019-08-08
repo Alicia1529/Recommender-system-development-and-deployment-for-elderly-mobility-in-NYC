@@ -38,9 +38,10 @@ app_name = <the name of your app>
 	[query](https://github.com/Alicia1529/Recommender-system-development-and-deployment-for-elderly-mobility-in-NYC/blob/12fa12d4ec46f4045517532d894e3ae1a49e2240/main/main.py#L149-L150)
 	[execution1](https://github.com/Alicia1529/Recommender-system-development-and-deployment-for-elderly-mobility-in-NYC/blob/12fa12d4ec46f4045517532d894e3ae1a49e2240/main/main.py#L165-L175)
 	[execution2](https://github.com/Alicia1529/Recommender-system-development-and-deployment-for-elderly-mobility-in-NYC/blob/12fa12d4ec46f4045517532d894e3ae1a49e2240/main/main.py#L212-L222)
-
+		```
 		#notice that context is in json format
 		INSERT INTO `AllRecommendations`(`user_id`, `restaurant_id`, `recommendation_time`,`context`,`local_time`) VALUES (1231241412,brLV35q22JnxSekUm1Wt8A,2019-08-08 00:45:00,[1370.3069959094935, 3.5, 156, 1, 0.3678531037837738, 0.0245118791941913, 0.2884336991225436, -0.05679204451798186, 0.6186320352542078, 0.04952941385891926, 0.9322101108964919, -0.08197835826599327, 0.172544659806304, -0.2907603034548553, 0.052044121638843165, 0.36213477381726544, 0.02664460900300173, -0.12316523118316319, -0.04440593093193514, -0.12558986115695092, -0.026363099056166482, 0.06656524824647395, 0.0036090332773570824, -0.048723771666322656, -0.021830542997385245, -0.016607904142542648, 0.0175328386382096, 0.010678038991785925, 0.00031283715293467003, -0.015936172591742823, -0.007663354654449245, 0.006364743050601441, -0.018076355316729666, 0.013047002112322082, 0.0031238381114750296, 0.0012586542667849707, -0.004989686603965165, 0.019779303407707022, -0.004699269738667344, -0.012336437534250358, 0.008833647420428102, -0.001540721732683503, 0.003366412234424986, 0.019760043150998323, 0.006335963334146817, 0.00010389827537397681, -0.001825597229205127, 0.005353118672087066, 0.00468141683544218, 0.007346067350638506, 0.007177251878558236, -0.0013478173909830557, 0.00952805237548515, -0.0061604682930519765],2019-08-08T00:44:58-04:00);
+		```
 
 		INSERT INTO `RecommendationsSevenDays`(user_id, restaurant_id, recommendation_time) VALUES (1231241412,brLV35q22JnxSekUm1Wt8A,2019-08-08 00:45:00)
 
@@ -52,17 +53,17 @@ INSERT INTO UserRating(user_id,restaurant_id,recommendation_time,user_selection_
 
 ### 4. Preprocessing:
 
-1. get_restaurant_data.py: get around 5w restaurant records from Yelp API to train PCA model and for offline evaluation
+1. get_restaurant_data.py: get around 50K restaurant records from Yelp API to train PCA model and for offline evaluation.
 
 	output: /data/restaurants_information/...(12 files)
 
-2. pca_model_training.py: convert text data(restaurant info) to feature matrix and train PCA model to reduce the dimension to 
+2. pca_model_training.py: convert text data(restaurant info) to feature matrix and train PCA model to 54-dimension. 
 
-	output: /main/pca_model.sav (but now it's moved to /main folder)
+	output: /main/pca_model.sav
 
-3. offline_evaluation_data_simulation.ipynb: generated synthetic data (food preference) to test the algorithm, but much of the part is similar to pca_model_training program
+3. offline_evaluation_data_simulation.ipynb: generated synthetic data (food preference) to test the algorithm, but much of the part is similar to pca_model_training program.
 
-	output: /simulated_arm_contexts.pyc (but now it's moved to /data folder)
+	output: /data/simulated_arm_contexts.pyc 
 		
 ### 5. Main:
 
