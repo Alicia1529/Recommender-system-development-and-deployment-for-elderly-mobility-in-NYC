@@ -3,7 +3,7 @@
 
 1. Please keep of positive word array in "preprocessing/pca_model_training.py","preprocessing/data_stimulation.py/","main/featureExtraction.py" consistent
 
-### 2. Configuration file:
+### 2. Configuration File:
 
 1. Please create one python file under main folder `main/config.py` with Yelp API information([Yelp Fusion API](https://www.yelp.com/developers/documentation/v3))
 
@@ -53,6 +53,15 @@ app_name = <the name of your app>
 		```
 		INSERT INTO UserRating(user_id,restaurant_id,recommendation_time,user_selection_time,reward) VALUES(1231241412,brLV35q22JnxSekUm1Wt8A,2019-08-08 00:45:00,CURRENT_TIMESTAMP,1.0)
 		```
+		
+### 4. Install Dependency:
+
+To install the dependencies, run: `pip install -r requirements.txt`
+
+### 5. Start the Program:
+
+To start the web services, run under main folder `python app.py`
+
 
 ## Descriptions
 ### 1. Preprocessing:
@@ -279,7 +288,3 @@ __proto__: Response
  printed line: "Try to insert a record, but doesn't conform to the foreign key policy"
 ```
 
-## Others:
-To install the dependencies, run: `pip install -r requirements.txt`
-
-To start the web services, run under main folder `python app.py`
