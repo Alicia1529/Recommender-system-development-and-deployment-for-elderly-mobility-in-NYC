@@ -276,7 +276,7 @@ __proto__: Response
  printed line: "Try to insert a record, but doesn't conform to the foreign key policy"
 ```
 
-### 7. Others:
+## Others:
 To install the dependencies, run: `pip install -r requirements.txt`
 
 To start the web services, run under main folder `python app.py`
