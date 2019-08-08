@@ -4,12 +4,11 @@
 
 ### 2. Configuration file:
 
-1. please create one python file under main folder with content(all information are from yelp)
+1. please create one python file under main folder with content([Yelp Fusion API](https://www.yelp.com/developers/documentation/v3))
 ```
 api_key = <your api key>
 client_id = <your client id>
 app_name = <the name of your app>
-
 ```
 2. remove all current data files under `main/model/`(they will be generated again)
 
