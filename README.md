@@ -1,23 +1,36 @@
-### Notice:
+## SETUP
+### 1. Notice:
 
 1. please keep of positive word array in "preprocessing/pca_model_training.ipynb","preprocessing/data_stimulation.ipynb/" consistent
 
+### 2. Configuration file:
 
-### Database Setup:
+1. please create one python file under main folder `main/config.py` with Yelp API information([Yelp Fusion API](https://www.yelp.com/developers/documentation/v3))
+
+```
+api_key = <your api key>
+client_id = <your client id>
+app_name = <the name of your app>
+```
+2. remove all current data files under `main/model/`(they will be generated again)
+
+### 3. Database Setup:
 
 1. create a database called `UrbanConnector` in MySQL
 
-2. import file "/database/database_setup.sql" to create two tables
+2. import file `/database/database_setup.sql` to create three tables:`AllRecommendations`,`RecommendationsSevenDays`,`UserRating`
 
-3. change the database setting in the following files to your own database:
+3. change database setting and connect to database: 
 
-	A. main/app.py [change the database of the webservice](https://github.com/Alicia1529/Recommender-system-development-and-deployment-for-elderly-mobility-in-NYC/blob/12fa12d4ec46f4045517532d894e3ae1a49e2240/main/app.py#L18-L24)
-
-	B. main/main.py [if you want to run this individual file and test the program with terminal](https://github.com/Alicia1529/Recommender-system-development-and-deployment-for-elderly-mobility-in-NYC/blob/12fa12d4ec46f4045517532d894e3ae1a49e2240/main/main.py#L280-L287)
+	A. If you want to run this individual file and test the program with terminal, then modify the corresponding part in [main/main.py](https://github.com/Alicia1529/Recommender-system-development-and-deployment-for-elderly-mobility-in-NYC/blob/12fa12d4ec46f4045517532d894e3ae1a49e2240/main/main.py#L280-L287) 
 	
-	C. all modifications to the database:
+	B. To change the database of the webservice, modify [main/app.py](https://github.com/Alicia1529/Recommender-system-development-and-deployment-for-elderly-mobility-in-NYC/blob/12fa12d4ec46f4045517532d894e3ae1a49e2240/main/app.py#L18-L24)
+
+	
+4. (Optional)Test if the database is set up correctly(all modifications to the database):
 	
 	1. [update the RecommendationsSevenDays table](https://github.com/Alicia1529/Recommender-system-development-and-deployment-for-elderly-mobility-in-NYC/blob/12fa12d4ec46f4045517532d894e3ae1a49e2240/main/main.py#L90-L94)
+	
 		test: `DELETE FROM RecommendationsSevenDays WHERE recommendation_time < (NOW() - INTERVAL 7 DAY)`
 
 	2. [query recommendations for this user in the past 7 days](https://github.com/Alicia1529/Recommender-system-development-and-deployment-for-elderly-mobility-in-NYC/blob/12fa12d4ec46f4045517532d894e3ae1a49e2240/main/main.py#L103-L105)
@@ -26,54 +39,51 @@
 	[query](https://github.com/Alicia1529/Recommender-system-development-and-deployment-for-elderly-mobility-in-NYC/blob/12fa12d4ec46f4045517532d894e3ae1a49e2240/main/main.py#L149-L150)
 	[execution1](https://github.com/Alicia1529/Recommender-system-development-and-deployment-for-elderly-mobility-in-NYC/blob/12fa12d4ec46f4045517532d894e3ae1a49e2240/main/main.py#L165-L175)
 	[execution2](https://github.com/Alicia1529/Recommender-system-development-and-deployment-for-elderly-mobility-in-NYC/blob/12fa12d4ec46f4045517532d894e3ae1a49e2240/main/main.py#L212-L222)
+		```
+		#notice that context is in json format
+		INSERT INTO `AllRecommendations`(`user_id`, `restaurant_id`, `recommendation_time`,`context`,`local_time`) VALUES (1231241412,brLV35q22JnxSekUm1Wt8A,2019-08-08 00:45:00,[1370.3069959094935, 3.5, 156, 1, 0.3678531037837738, 0.0245118791941913, 0.2884336991225436, -0.05679204451798186, 0.6186320352542078, 0.04952941385891926, 0.9322101108964919, -0.08197835826599327, 0.172544659806304, -0.2907603034548553, 0.052044121638843165, 0.36213477381726544, 0.02664460900300173, -0.12316523118316319, -0.04440593093193514, -0.12558986115695092, -0.026363099056166482, 0.06656524824647395, 0.0036090332773570824, -0.048723771666322656, -0.021830542997385245, -0.016607904142542648, 0.0175328386382096, 0.010678038991785925, 0.00031283715293467003, -0.015936172591742823, -0.007663354654449245, 0.006364743050601441, -0.018076355316729666, 0.013047002112322082, 0.0031238381114750296, 0.0012586542667849707, -0.004989686603965165, 0.019779303407707022, -0.004699269738667344, -0.012336437534250358, 0.008833647420428102, -0.001540721732683503, 0.003366412234424986, 0.019760043150998323, 0.006335963334146817, 0.00010389827537397681, -0.001825597229205127, 0.005353118672087066, 0.00468141683544218, 0.007346067350638506, 0.007177251878558236, -0.0013478173909830557, 0.00952805237548515, -0.0061604682930519765],2019-08-08T00:44:58-04:00);
+		```
 
-```
-#notice that context is in json format
-INSERT INTO `AllRecommendations`(`user_id`, `restaurant_id`, `recommendation_time`,`context`,`local_time`) VALUES (1231241412,brLV35q22JnxSekUm1Wt8A,2019-08-08 00:45:00,[1370.3069959094935, 3.5, 156, 1, 0.3678531037837738, 0.0245118791941913, 0.2884336991225436, -0.05679204451798186, 0.6186320352542078, 0.04952941385891926, 0.9322101108964919, -0.08197835826599327, 0.172544659806304, -0.2907603034548553, 0.052044121638843165, 0.36213477381726544, 0.02664460900300173, -0.12316523118316319, -0.04440593093193514, -0.12558986115695092, -0.026363099056166482, 0.06656524824647395, 0.0036090332773570824, -0.048723771666322656, -0.021830542997385245, -0.016607904142542648, 0.0175328386382096, 0.010678038991785925, 0.00031283715293467003, -0.015936172591742823, -0.007663354654449245, 0.006364743050601441, -0.018076355316729666, 0.013047002112322082, 0.0031238381114750296, 0.0012586542667849707, -0.004989686603965165, 0.019779303407707022, -0.004699269738667344, -0.012336437534250358, 0.008833647420428102, -0.001540721732683503, 0.003366412234424986, 0.019760043150998323, 0.006335963334146817, 0.00010389827537397681, -0.001825597229205127, 0.005353118672087066, 0.00468141683544218, 0.007346067350638506, 0.007177251878558236, -0.0013478173909830557, 0.00952805237548515, -0.0061604682930519765],2019-08-08T00:44:58-04:00);
+		INSERT INTO `RecommendationsSevenDays`(user_id, restaurant_id, recommendation_time) VALUES (1231241412,brLV35q22JnxSekUm1Wt8A,2019-08-08 00:45:00)
 
-INSERT INTO `RecommendationsSevenDays`(user_id, restaurant_id, recommendation_time) VALUES (1231241412,brLV35q22JnxSekUm1Wt8A,2019-08-08 00:45:00)
-```
-
-4. [update user profile according to the response](https://github.com/Alicia1529/Recommender-system-development-and-deployment-for-elderly-mobility-in-NYC/blob/12fa12d4ec46f4045517532d894e3ae1a49e2240/main/main.py#L248-L256)
+	4. [update user profile according to the response](https://github.com/Alicia1529/Recommender-system-development-and-deployment-for-elderly-mobility-in-NYC/blob/12fa12d4ec46f4045517532d894e3ae1a49e2240/main/main.py#L248-L256)
 
 ```
 INSERT INTO UserRating(user_id,restaurant_id,recommendation_time,user_selection_time,reward) VALUES(1231241412,brLV35q22JnxSekUm1Wt8A,2019-08-08 00:45:00,CURRENT_TIMESTAMP,1.0)
 ```
+## Descriptions
+### 1. Preprocessing:
 
-### Preprocessing:
-
-1. get_restaurant_data.py: get around 5w restaurant records from Yelp API to train PCA model and for offline evaluation
+1. get_restaurant_data.py: get around 50K restaurant records from Yelp API to train PCA model and for offline evaluation.
 
 	output: /data/restaurants_information/...(12 files)
 
-2. pca_model_training.py: convert text data(restaurant info) to feature matrix and train PCA model to reduce the dimension to 
+2. pca_model_training.py: convert text data(restaurant info) to feature matrix and train PCA model to 54-dimension. 
 
-	output: /main/pca_model.sav (but now it's moved to /main folder)
+	output: /main/pca_model.sav
 
-3. offline_evaluation_data_simulation.ipynb: generated synthetic data (food preference) to test the algorithm, but much of the part is similar to pca_model_training program
+3. offline_evaluation_data_simulation.ipynb: generated synthetic data (food preference) to test the algorithm, but much of the part is similar to pca_model_training program.
 
-	output: /simulated_arm_contexts.pyc (but now it's moved to /data folder)
+	output: /data/simulated_arm_contexts.pyc 
 		
-### Main:
+### 2. Main:
 
-1. yelDataCollection.py: used to make request to Yelp API and retrieve candidate restaurants information.
-(multithreading to increase the speed)
-
-run it directlly will give you some restaurants that satisfy your setting
+1. yelDataCollection.py: make request to Yelp API and retrieve candidate restaurants information.
+(Using multithreading strategy to increase the speed): it will give you some restaurants that satisfy your setting
 
 2. featureExtraction.py: convert the text data to feature matrix.
 
 3. linUCB.py: main recommendation algorithm using contextual bandit algorithm
-you can run it directly to see the result of an offline evaluation
+you can run it directly to see results of an offline evaluation
 
-4. main.py: main functions to implement the recommendation algorithm, like get and save matrices, make recommendations and update the result.
+4. main.py: main functions to implement the recommendation algorithm, such as get and save matrices, make recommendations and update the result.
 
 5. app.py: web framework
 
 	
-### Two main services:
+### 3. Two main services:
 
-1. get recommendations -> return three restaurants(sometimes less than 3 because this are not enough restaurants)
+1. get recommendations -> return three restaurants(sometimes less than 3 options because there are not enough restaurants)
 
 ```
 @app.route('/getRecommendation:<user_profile>+<user_id>+<local_time>+<longitude>+<latitude>+<radius>+<price>', methods=['GET'])
@@ -190,7 +200,7 @@ body:{
     ]
   }
   
-2.error: because the distance or price restriction is too tight, none of the restaurants satisfy the requirement
+2.error: because the distance or price restriction is too tight, none of the restaurants satisfy the requirements in Yelp API
 Response {type: "cors", url: "http://localhost:8000/getRecommendation:senior+1231241412+12:08+-73.984345+40.693899+1+1", redirected: false, status: 200, ok: true, …}
 body: (...)
 bodyUsed: true
@@ -205,7 +215,7 @@ body:{
 "error": "please relax restrictions of radius or price prference"
 }
 
-3.error: because there are no qualified destinations
+3.error: because there are no qualified destinations after running the recommendation algorithm
 Response {type: "cors", url: "http://localhost:8000/getRecommendation:senior+1231241412+12:08+-73.984345+40.693899+1+1", redirected: false, status: 200, ok: true, …}
 body: (...)
 bodyUsed: true
@@ -266,7 +276,7 @@ __proto__: Response
  printed line: "Try to insert a record, but doesn't conform to the foreign key policy"
 ```
 
-### Others:
+## Others:
 To install the dependencies, run: `pip install -r requirements.txt`
 
 To start the web services, run under main folder `python app.py`
