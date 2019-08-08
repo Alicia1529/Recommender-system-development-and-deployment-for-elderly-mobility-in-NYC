@@ -69,23 +69,21 @@ INSERT INTO UserRating(user_id,restaurant_id,recommendation_time,user_selection_
 ### 2. Main:
 
 1. yelDataCollection.py: make request to Yelp API and retrieve candidate restaurants information.
-(multithreading to increase the speed)
-
-run it directlly will give you some restaurants that satisfy your setting
+(Using multithreading strategy to increase the speed): it will give you some restaurants that satisfy your setting
 
 2. featureExtraction.py: convert the text data to feature matrix.
 
 3. linUCB.py: main recommendation algorithm using contextual bandit algorithm
-you can run it directly to see the result of an offline evaluation
+you can run it directly to see results of an offline evaluation
 
-4. main.py: main functions to implement the recommendation algorithm, like get and save matrices, make recommendations and update the result.
+4. main.py: main functions to implement the recommendation algorithm, such as get and save matrices, make recommendations and update the result.
 
 5. app.py: web framework
 
 	
 ### 3. Two main services:
 
-1. get recommendations -> return three restaurants(sometimes less than 3 because this are not enough restaurants)
+1. get recommendations -> return three restaurants(sometimes less than 3 options because there are not enough restaurants)
 
 ```
 @app.route('/getRecommendation:<user_profile>+<user_id>+<local_time>+<longitude>+<latitude>+<radius>+<price>', methods=['GET'])
@@ -202,7 +200,7 @@ body:{
     ]
   }
   
-2.error: because the distance or price restriction is too tight, none of the restaurants satisfy the requirement
+2.error: because the distance or price restriction is too tight, none of the restaurants satisfy the requirements in Yelp API
 Response {type: "cors", url: "http://localhost:8000/getRecommendation:senior+1231241412+12:08+-73.984345+40.693899+1+1", redirected: false, status: 200, ok: true, …}
 body: (...)
 bodyUsed: true
@@ -217,7 +215,7 @@ body:{
 "error": "please relax restrictions of radius or price prference"
 }
 
-3.error: because there are no qualified destinations
+3.error: because there are no qualified destinations after running the recommendation algorithm
 Response {type: "cors", url: "http://localhost:8000/getRecommendation:senior+1231241412+12:08+-73.984345+40.693899+1+1", redirected: false, status: 200, ok: true, …}
 body: (...)
 bodyUsed: true
